@@ -49,16 +49,23 @@ To ensure data safety without sacrificing performance, OmniChat uses a 3-step st
 
 ### 1. Start Infrastructure
 OmniChat uses Docker Compose to spin up the required databases and brokers.
+```bash 
+docker-compose up -d
+```
+### 2. Run the Application
 ```bash
-docker-compose up -d ```
-### 2.
 # Using the 'dev' profile for local debugging
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
 
 ### 3. Verify Connection
-The WebSocket endpoint will be available at: ws://localhost:8080/ws-chat
+The WebSocket endpoint will be available at: 
+```bash 
+ws://localhost:8080/ws-chat
+```
 
 ## 📂 Project Structure
+```bash
 src/main/java/com/krish/chatApp/
 ├── config/       # WebSocket, RabbitMQ, & Security Configs
 ├── controller/   # STOMP & REST Endpoints
@@ -66,3 +73,5 @@ src/main/java/com/krish/chatApp/
 ├── repository/   # Data Access Layers
 ├── service/      # Business Logic (Dual-Write, Validation)
 └── util/         # HMAC Signers & Parsers
+```
+
