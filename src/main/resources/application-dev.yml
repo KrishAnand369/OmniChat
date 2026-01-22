@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  # 1. PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/omnichat_core
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  # 2. JPA (Debug Mode)
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  # 3. Data Layer (Mongo + Redis combined under ONE 'data' key)
+  mongodb:
+    host: localhost
+    port: 27017
+    username: root
+    password: secret
+    database: omnichat_logs
+
+  data:
+    mongodb:
+      auto-index-creation: true
+
+    redis:
+      host: localhost
+      port: 6379
+
+  # 4. RabbitMQ
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+# 5. Logging
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.messaging: DEBUG

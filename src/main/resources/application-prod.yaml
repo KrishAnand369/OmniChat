@@ -1,0 +1,68 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: OmniChat
+
+  # 1. PostgreSQL (Production)
+  datasource:
+    # We use Env Variables (${VAR_NAME}) so passwords aren't in the code.
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/omnichat_core}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  # 2. JPA (Production Mode - High Performance)
+  jpa:
+    # "validate" checks if the DB schema matches the code.
+    # It will NOT create tables (safer for prod).
+    hibernate:
+      ddl-auto: validate
+    show-sql: false # Turn off logs to save disk space
+    properties:
+      hibernate:
+        format_sql: false
+
+  # 3. Data Layer (Mongo & Redis)
+  mongodb:
+    # THE FIX for "Deprecated":
+    # In modern Spring Boot (3.x/4.x), connection properties moved to 'spring.mongodb'.
+    # The URI contains everything: "mongodb://user:pass@host:27017/dbname"
+    uri: ${MONGO_URI:mongodb://localhost:27017/omnichat_logs}
+
+  data:
+    mongodb:
+      # Auto-indexing can slow down startup in prod with huge data.
+      # Usually set to false, but kept true here for your initial setup.
+      auto-index-creation: true
+
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:} # defaults to empty if not set
+
+  # 4. RabbitMQ (Production)
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASS:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          max-retries: 3
+
+  # 5. Disable Docker Compose in Prod
+  # We don't want the app trying to spin up containers on the production server.
+  docker:
+    compose:
+      enabled: false
+
+logging:
+  level:
+    root: WARN # Only show Errors and Warnings in Prod
+    com.krish.chatApp: INFO
+

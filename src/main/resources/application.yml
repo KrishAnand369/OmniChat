@@ -1,0 +1,36 @@
+# src/main/resources/application.yml
+spring:
+  application:
+    name: OmniChat
+
+  # 1. BEST PRACTICE: Handling Dates
+  # Ensure standard ISO-8601 format (e.g., "2023-10-05T14:30:00Z") everywhere.
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+  # 2. BEST PRACTICE: File Upload Limits (Safety)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  # 3. Docker Compose (The Magic for Juniors)
+  # Since you added the dependency, this tells Spring:
+  # "If you see a docker-compose.yml, start it automatically."
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+      lifecycle-management: start-only # Don't shut down DBs when app stops (faster restarts)
+
+  # 4. RabbitMQ Default Config (Resilience)
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-retries: 3
+          multiplier: 2.0
