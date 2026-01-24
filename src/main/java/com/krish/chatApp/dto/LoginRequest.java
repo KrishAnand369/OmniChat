@@ -1,4 +1,8 @@
 package com.krish.chatApp.dto;
 
-public class LoginRequest {
-}
+// The headers handle the ID/Security.
+// This body is just for updating profile info (Upsert).
+public record LoginRequest(
+        String displayName,
+        String profileUrl
+) {}
