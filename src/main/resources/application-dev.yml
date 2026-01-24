@@ -47,3 +47,7 @@ logging:
     root: INFO
     org.springframework.web: DEBUG
     org.springframework.messaging: DEBUG
+
+#socket
+app:
+  socket-url: ws://localhost:8080/ws-chat

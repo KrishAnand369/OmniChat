@@ -2,13 +2,15 @@
 spring:
   application:
     name: OmniChat
+  profiles:
+    active: dev
 
   # 1. BEST PRACTICE: Handling Dates
   # Ensure standard ISO-8601 format (e.g., "2023-10-05T14:30:00Z") everywhere.
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-    time-zone: UTC
+#  jackson:
+#    serialization:
+#      write-dates-as-timestamps: false
+#    time-zone: UTC
 
   # 2. BEST PRACTICE: File Upload Limits (Safety)
   servlet:
@@ -22,8 +24,8 @@ spring:
   docker:
     compose:
       enabled: true
-      file: docker-compose.yml
-      lifecycle-management: start-only # Don't shut down DBs when app stops (faster restarts)
+      file: compose.yaml
+#      lifecycle-management: start-only # Don't shut down DBs when app stops (faster restarts)
 
   # 4. RabbitMQ Default Config (Resilience)
   rabbitmq:
