@@ -4,9 +4,9 @@ server:
 spring:
   # 1. PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/omnichat_core
+    url: jdbc:postgresql://localhost:5433/omnichat_core
     username: postgres
-    password: password
+    password: dba
     driver-class-name: org.postgresql.Driver
 
   # 2. JPA (Debug Mode)
@@ -21,7 +21,7 @@ spring:
   # 3. Data Layer (Mongo + Redis combined under ONE 'data' key)
   mongodb:
     host: localhost
-    port: 27017
+    port: 27018
     username: root
     password: secret
     database: omnichat_logs

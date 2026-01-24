@@ -1,16 +1,62 @@
 services:
+  # 1. MongoDB (Chat Logs)
   mongodb:
-    image: 'mongo:latest'
+    image: mongo:6.0
+    container_name: omnichat_mongo
+    restart: always
     environment:
-      - 'MONGO_INITDB_DATABASE=mydatabase'
-      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
-      - 'MONGO_INITDB_ROOT_USERNAME=root'
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: omnichat_logs
     ports:
-      - '27017'
+      - '27018:27017' # Fixed: Map host 27017 to container 27017
+    volumes:
+      - mongo_data:/data/db
+
+  # 2. RabbitMQ (Message Broker)
   rabbitmq:
-    image: 'rabbitmq:latest'
+    image: rabbitmq:3-management # Fixed: Use the image with UI pre-installed
+    container_name: omnichat_rabbit
+    restart: always
     environment:
-      - 'RABBITMQ_DEFAULT_PASS=secret'
-      - 'RABBITMQ_DEFAULT_USER=myuser'
+      RABBITMQ_DEFAULT_USER: guest # 'guest' is standard for dev
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - '5672'
+      - '5672:5672'   # AMQP (Backend communication)
+      - '15672:15672' # Management Dashboard (http://localhost:15672)
+      - '61613:61613' # STOMP (REQUIRED for WebSockets!)
+    # Critical: Enable STOMP plugin so WebSockets can talk to RabbitMQ
+    command: /bin/bash -c "rabbitmq-plugins enable rabbitmq_stomp rabbitmq_management && rabbitmq-server"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # 3. PostgreSQL (Users & Metadata)
+  postgres:
+    image: postgres:15-alpine
+    container_name: omnichat_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dba
+      POSTGRES_DB: omnichat_core
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 4. Redis (Sessions & Presence)
+  redis:
+    image: redis:7-alpine
+    container_name: omnichat_redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+# Persistent Volumes (So you don't lose data when you restart Docker)
+volumes:
+  mongo_data:
+  rabbitmq_data:
+  postgres_data:
+  redis_data:
