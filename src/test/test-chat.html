@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OmniChat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .sent { color: blue; text-align: right; }
+        .received { color: green; text-align: left; }
+    </style>
+</head>
+<body>
+    <h2>OmniChat WebSocket Tester</h2>
+    <div id="status" style="color: red; font-weight: bold;">Disconnected</div>
+    
+    <div id="messages"></div>
+
+    <input type="text" id="msgInput" placeholder="Type a message..." style="width: 70%;">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        // --- CONFIGURATION ---
+        const TOKEN = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMSIsInRlbmFudElkIjoiZGVtbyIsImlhdCI6MTc2OTI3MTA4NiwiZXhwIjoxNzY5Mjc0Njg2fQ.Nefn-WBPn9R8UfGAhvuZE75vgwtNKy02TZbWZY4D35YpMLLNVYg6xzV2eIQ79Xkp"; // <--- PASTE YOUR TOKEN HERE
+        const CONVERSATION_ID = "550e8400-e29b-41d4-a716-446655440000"; // Random UUID for testing
+        // ---------------------
+
+        let stompClient = null;
+
+        function connect() {
+            // 1. Connect to the Endpoint
+            const socket = new SockJS('http://localhost:8080/ws-chat');
+            stompClient = Stomp.over(socket);
+
+            // 2. Add Auth Header
+            const headers = {
+                'Authorization': 'Bearer ' + TOKEN
+            };
+
+            stompClient.connect(headers, function (frame) {
+                document.getElementById("status").innerText = "Connected!";
+                document.getElementById("status").style.color = "green";
+                console.log('Connected: ' + frame);
+
+                // 3. Subscribe to a Topic (e.g., a specific conversation)
+                stompClient.subscribe('/topic/conversation.' + CONVERSATION_ID, function (messageOutput) {
+                    showMessage(JSON.parse(messageOutput.body), 'received');
+                });
+
+            }, function(error) {
+                console.error("Connection error:", error);
+                document.getElementById("status").innerText = "Connection Failed (Check Console)";
+            });
+        }
+
+        function sendMessage() {
+            const content = document.getElementById("msgInput").value;
+            
+            if(stompClient && content) {
+                // 4. Send Message to Controller
+                const chatMessage = {
+                    conversationId: CONVERSATION_ID,
+                    content: content,
+                    type: "TEXT"
+                };
+                
+                stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+                document.getElementById("msgInput").value = '';
+            }
+        }
+
+        function showMessage(message, type) {
+            const response = document.getElementById('messages');
+            const p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.className = type;
+            
+            // Allow checking if it's me or them
+            const isMe = (message.senderId === type); 
+            p.appendChild(document.createTextNode(message.content));
+            response.appendChild(p);
+        }
+
+        // Connect immediately on load
+        connect();
+    </script>
+</body>
+</html>
